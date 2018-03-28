@@ -2,7 +2,7 @@
 %
 % circle method for finding strokes
 
-addpath('./images/');
+addpath('./images/', './helper_functions/');
 
 clearvars;
 close all;
@@ -22,20 +22,11 @@ img = imgaussfilt(img);
 BW = im2bw(img, 0.9);       % convert to black and white image
 % img = img < 1;              % convert to boolean array
 D = bwdist(BW);             % Euclidean distance to nearest white point
-D = imgaussfilt(D, 3);      % apply Gaussian filter
+D = imgaussfilt(D, 2);      % apply Gaussian filter
 
 RGB = repmat(rescale(D), [1 1 3]);
 
-%% get strokes
-
-[~,indices] = localmax(D);            % find local maximas of each row
-[rows1, cols1] = ind2sub(size(D),indices);
-
-[~, indices_transpose] = localmax(transpose(D));
-[cols2, rows2] = ind2sub(size(transpose(D)),indices_transpose);
-
-cols = [cols1; cols2];
-rows = [rows1; rows2];
+img_outlint = get_image_outline(BW);
 
 %% plots
 
@@ -43,7 +34,7 @@ if plotting
     
     figure;
     subplot(1, 3, 1);
-    imagesc(img);
+    imagesc(BW);
     axis equal;
 
     subplot(1, 3, 2);
@@ -51,9 +42,9 @@ if plotting
     axis equal;
 
     subplot(1, 3, 3);
-    imagesc(D);
-    hold on;
-    scatter(cols, rows, '.r');
+%     imagesc(D);
+%     hold on;
+    imagesc(img_outline);
     axis equal;
     grid on;
     
