@@ -1,85 +1,71 @@
 %% robot art comp
-%
-% circle method for finding strokes
-
-addpath('./images/', './helper_functions/');
 
 clearvars;
 close all;
 
+addpath('./images/', './helper_functions/');
+constants;
+
 plotting = true;
-saving = true;
+saving = false;
 
 %% original image
 
+file_in = 'flower.jpg';
 % file_in = 'fire.jpg';
-file_in = 'koi.jpg';
+% file_in = 'bird.png';
+% file_in = 'koi.jpg';
 file_out = 'result5.png';
 img = imread(file_in);
+n_rows = size(img, 1);
+n_cols = size(img, 2);
 
 %% process the image
 
-img = imgaussfilt(img,1);
-BW = im2bw(img, 0.9);           % convert to black and white image
-% img = img < 1;              % convert to boolean array
+img = imgaussfilt(img);         % apply Gaussian filter
+% BW = im2bw(img, 0.9);           % convert to black and white image
+img = rgb2gray(img);            % convert to grayscale
+BW = imbinarize(img);           % convert to black and white
+BW = bwmorph(BW, 'spur');       % remove random pixels
+BW = imfill(1- BW, 'holes');       % fill missing pixels
+BW = 1 - BW;
 D = bwdist(BW);                 % Euclidean distance to nearest white point
-max_radius = ceil(max(max(D))); % largest circle radius we can fit in the image
 % D = imgaussfilt(D);            	% apply Gaussian filter
-
+[r_maxima, c_maxima] = get_local_maxima_2d(D);  % get the stroke centres
 img_outline = get_image_outline(BW, true);
-[r_outline, c_outline] = find(img_outline);
-img_stroke = zeros(size(img_outline,1), size(img_outline,2));
 
-[r_maxima, c_maxima] = get_local_maxima_2d(D);
+%% find regions within the image
 
-fit_shape_vector = [1 zeros(1, max_radius-1)]; % radius 1 always works because the circle is just a 1x1 mask (i.e. pixel)
-fit_shape_array = repmat(fit_shape_vector, length(r_outline), 1);
-fit_circle_centres = [r_outline, c_outline];
+img_regions = zeros(n_rows, n_cols);            % binary image that stores the different regions
+CC = bwconncomp(1 - BW);                        % compute the regions
+for ii = 1:CC.NumObjects
+    img_regions(CC.PixelIdxList{ii}) = ii;      % label the region
+    CC.Strokes_r{ii} = [];
+    CC.Strokes_c{ii} = [];
+    CC.Strokes_image{ii} = zeros(n_rows, n_cols);
+end
 
-% loop through each pixel of the image shape outline
-for ii = 1:length(r_outline)
+%% organise the stroke centres by region
+
+for ii = 1:length(r_maxima)
+    region = img_regions(r_maxima(ii), c_maxima(ii));
+    CC.Strokes_r{region} = [CC.Strokes_r{region}; r_maxima(ii)];
+    CC.Strokes_c{region} = [CC.Strokes_c{region}; c_maxima(ii)];
+    CC.Strokes_image{region}(r_maxima(ii), c_maxima(ii)) = true;
+end
+
+%% get endpoints for each stroke
+
+for ii = 1:CC.NumObjects
     
-    for radius = 2:max_radius
-    
-    circle = circle_mask(radius);           % get the circle mask
-    [r_circle, c_circle] = find(circle);    % get indices of the circle outline
-    ind_offset = (radius-1)*2;              % index offset required to get image chunk
-    
-        % loop through circle mask and test against image shape
-        for jj = 1:length(r_circle)
-
-            rr = r_outline(ii) - (r_circle(jj) - 1);
-            if (rr < 1) || (rr+ind_offset > size(BW, 1))    % check if indices exceed original image boundaries
-                continue
-            end
-            cc = c_outline(ii) - (c_circle(jj) - 1);
-            if (cc < 1) || (cc+ind_offset > size(BW, 2))    % check if indices exceed original image boundaries
-                continue
-            end
-            
-            % see if circle mask falls outside the shape
-%             img_chunk = BW(rr:rr+ind_offset, cc:cc+ind_offset);
-            if sum(sum(BW(rr:rr+ind_offset, cc:cc+ind_offset).*circle)) == 0
-                fit_shape_array(ii, radius) = true;
-                fit_circle_centres(ii, :) = [round(mean([rr, rr+ind_offset])), round(mean([cc, cc+ind_offset]))];
-                break;  % only get one circle (even if multiple circles of current radius fit within shape)
-            end
-
-        end
-        
-        % if none of the circles of the current radius work, then the
-        % larger circles won't either
-        if fit_shape_array(ii, radius) == false
-            break;
-        end
-        
-    end
+    CC.Strokes_image{ii} = bwmorph(CC.Strokes_image{ii}, 'bridge');         % connect regions separated by one pixel
+    CC.Strokes_skeleton{ii} = bwmorph(CC.Strokes_image{ii}, 'skel', Inf);   % get skeleton
+    CC.Strokes_endpoints{ii} = bwmorph(CC.Strokes_skeleton{ii}, 'endpoints', Inf);  % get endpoints of skeleton
+    CC.Strokes_endpoints{ii} = join_close_endpoints(CC.Strokes_skeleton{ii}, CC.Strokes_endpoints{ii});
     
 end
 
-% for kk = 1:size(fit_circle_centres,1)
-%     img_stroke(fit_circle_centres(kk,1), fit_circle_centres(kk,2)) = 1;
-% end
+%% Bezier curve fit with the new endpoints
 
 %% plots
 
@@ -88,16 +74,17 @@ if plotting
     figure;
 
     subplot(1, 2, 1);
-    imagesc(img_outline);
+    imagesc(img_regions);
     axis equal;
     hold on;
-    scatter(fit_circle_centres(:,2), fit_circle_centres(:,1), '.r');
     
     subplot(1, 2, 2);
     imagesc(img_outline);
     axis equal;
     hold on;
-    scatter(c_maxima, r_maxima, '.r');
+    for ii = 1:CC.NumObjects
+        scatter(CC.Strokes_c{ii}, CC.Strokes_r{ii}, '.');
+    end
 
     if saving
         saveas(gcf, file_out);

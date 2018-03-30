@@ -1,5 +1,8 @@
 function [rows, cols] = get_local_maxima_2d(image)
 
+    global d_threshold;
+
+    image(image < d_threshold) = 0;
     [~,indices] = localmax(image);            % find local maximas of each row
     [rows1, cols1] = ind2sub(size(image),indices);
 
