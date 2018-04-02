@@ -1,6 +1,4 @@
 global d_threshold;
-d_threshold = 1;
+d_threshold = 3;
 
-% radius = 3;
-% global circle_mask;
-% circle_mask = circle_mask(radius);
+branch_threshold = 10;
