@@ -7,6 +7,7 @@ class Bezier():
         """
         Get each point and store it via it's enumerated value
         """
+        # Store the 4 control points for the cubic Bezier
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
@@ -16,15 +17,19 @@ class Bezier():
         """
         Returns the x,y position of the Bezier at the given parametric value t
         """
+        # Determine t matrix
         t_matrix = np.array([1, t, t*t, t*t*t])
 
+        # Bezier curve matrix
         M = np.array([[1, 0, 0, 0],
                       [-3, 3, 0, 0],
                       [3, -6, 3, 0],
                       [-1, 3, -3, 1]])
 
+        # Generate the dot product of the two matrices
         A = np.dot(t_matrix, M)
 
+        # Create vectors for the X and Y coordinates
         points_x = np.array([self.p1.x,
                              self.p2.x,
                              self.p3.x,
@@ -35,6 +40,7 @@ class Bezier():
                              self.p3.y,
                              self.p4.y])
 
+        # Return the point given at t as a 'Point' object
         return Point(np.dot(A, points_x), np.dot(A, points_y))
 
     def split_bezier(self, k):
@@ -144,6 +150,8 @@ class Bezier():
         if discriminant < 0:
             # Return -1 if non-real t exist
             return -1
+        elif x == 0:
+            return -1
         else:
             discriminant_sqrt = np.sqrt(discriminant)
             # Determine t_1 first and see if it qualifies as the inflexion point
@@ -161,7 +169,9 @@ class Bezier():
     def _get_tangent(self, t):
 
         # In the cases the control points overlap (e.g. P1 = P2), we need to
-        # account for this to avoid a 0 derivative vector
+        # account for this to avoid a 0 derivative vector (so as a quick-fix we're
+        # just moving the second point a little over)
+
         if self.p1.x == self.p2.x and self.p1.y == self.p2.y:
             # Offset P2 a little bit depending on the direction of P4
             if self.p4.x <= self.p1.x:
@@ -191,11 +201,12 @@ class Bezier():
 
         # Get derivative at point t for both X and Y
         t_matrix = np.array([1, t, t*t])
-
+        # Derivative matrix
         M = np.array([[1, 0, 0],
                       [-2, 2, 0],
                       [1, -2, 1]])
 
+        # Matrix of weights for the Bezier curve's first derivative
         W_x = np.array([[3*(self.p2.x - self.p1.x)],
                         [3*(self.p3.x - self.p2.x)],
                         [3*(self.p4.x - self.p3.x)]])
@@ -205,21 +216,23 @@ class Bezier():
                         [3*(self.p4.y - self.p3.y)]])
 
         temp_matrix = np.dot(t_matrix, M)
+        # Determine the X and Y components of the derivative at point t
         derivative_x = np.dot(temp_matrix, W_x)[0]
         derivative_y = np.dot(temp_matrix, W_y)[0]
 
         d = np.linalg.norm([derivative_x, derivative_y])
 
         if d == 0:
-            print "d = 0"
             return np.array([[0],[0]])
         else:
             return np.array([[derivative_x/d],
                              [derivative_y/d]])
 
     def get_angle(self):
-        # Get the angle between the tangents at the endpoints of the curve
+        # Get the angle between the tangents at the endpoints of the curve (assuming
+        # get_tangent() returns unit vectors)
         _dot_product = np.dot(np.transpose(self._get_tangent(0)),self._get_tangent(1))
+        # Errors do occur where the dot product exceeds +1 or -1
         if _dot_product > 1:
             _angle = np.arccos(1)
         elif _dot_product < -1:
