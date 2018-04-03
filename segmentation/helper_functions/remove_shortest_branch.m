@@ -1,9 +1,18 @@
 function strokes = remove_shortest_branch(strokes)
-
-    for jj = 1:numel(end_x)
-        D = bwdistgeodesic(strokes.skeleton{ii}, end_x(jj), end_y(jj));
-        distanceToBranchPt = min(D(branch_idx));
-        Dmask(D < distanceToBranchPt) =true;
+    
+    [y, x] = find(strokes.endpoints);
+    Dmask = false(size(strokes.skeleton));
+    for ii = 1:numel(x)
+        D = bwdistgeodesic(strokes.skeleton, x(ii), y(ii));
+        distance_to_branchpoint = min(D(strokes.branchpoints));
+        if distance_to_branchpoint == strokes.len_shortest_branch
+            Dmask(D < strokes.len_shortest_branch) = true;            
+        end
     end
-
+    
+    strokes.skeleton = bwmorph(strokes.skeleton - Dmask, 'skel', Inf);
+    strokes.branchpoints = bwmorph(strokes.skeleton, 'branchpoints');
+    strokes.endpoints = bwmorph(strokes.skeleton, 'endpoints');
+    strokes.len_shortest_branch = get_shortest_branch(strokes);
+    
 end
