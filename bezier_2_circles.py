@@ -1,5 +1,7 @@
 """
+
     Attempt at transforming a Bezier curve to a series of circular arcs
+
 """
 from line_work import *
 from bezier import Bezier
@@ -12,16 +14,18 @@ def bezier_2_circles(p1, p2, p3, p4, scale_factor):
     When called, this function will directly print to screen the necessary G-Code
     commands to draw the provided bezier curve
     """
-    bezier_buffer = []
-
     # Create Bezier Curve from Points
     curve = Bezier(p1, p2, p3, p4)
 
+    # Set current Bezier curve to the curve we receive
     current_bezier = curve
+
     # Set inflexion flag to 0
     curvature_changed = 0
+    # Create buffer to store all pushed Bezier curve segments
     bezier_buffer = []
 
+    # Define error threshold to determine how close the estimates should be
     error_threshold = 0.0000001
 
     # Continue until we go through the entire curve
@@ -79,9 +83,14 @@ def bezier_2_circles(p1, p2, p3, p4, scale_factor):
 
         # Determine the incentre points of lines A and B
         X = find_intersection(A,B)
-        if X == None:
+        if X == None and len(bezier_buffer) > 0:
             # Just move onto the next section for now
             current_bezier = bezier_buffer.pop(len(bezier_buffer) - 1)
+        elif X == None and len(bezier_buffer) == 0:
+            # CHECK WHY THE BUFFER BECOMES EMPTY!!
+            # If there's no intersection, skip
+            print bezier_buffer
+            break
         else:
             # Find the incentre of points 1,4 and X
             G = find_incentre(current_bezier.p1, current_bezier.p4, X)
@@ -91,6 +100,7 @@ def bezier_2_circles(p1, p2, p3, p4, scale_factor):
             # Get the radius of the generated circle
             radius = np.linalg.norm([current_bezier.p1.x - centre.x, current_bezier.p1.y - centre.y])
             # Define two test points to determine the error of the arc to the curve
+            # Chose 25% and 75% along the curve for good estimates
             tp_1 = current_bezier.get_point(0.25)
             tp_2 = current_bezier.get_point(0.75)
             # Determine the average distance of the Bezier endpoints to the circle centre
@@ -124,6 +134,7 @@ def bezier_2_circles(p1, p2, p3, p4, scale_factor):
                     else:
                         direction = 2
 
+                # Return the circular command with 6 decimal place accuracy
                 print "G{0:d} ".format(direction) + \
                       "X{0:.6f} ".format(current_bezier.p4.x * scale_factor) + \
                       "Y{0:.6f} ".format(current_bezier.p4.y * scale_factor) + \
