@@ -19,7 +19,7 @@ file_out = 'result5.png';
 img = imread(file_in);
 n_rows = size(img, 1);
 n_cols = size(img, 2);
-blank_img = zeros(n_rows, n_cols);
+blank_image = false(n_rows, n_cols);
 
 %% process the image
 
@@ -32,44 +32,37 @@ BW = 1 - BW;
 
 %% find regions within the image
 
-strokes = bwconncomp(1 - BW);
-strokes.image = cell(strokes.NumObjects, 1);    % images with the strokes organised by region
-strokes.outline = cell(strokes.NumObjects, 1);  % image region outlines
-strokes.skeleton = cell(strokes.NumObjects, 1); % image region skeletons
-strokes.branchpoints = cell(strokes.NumObjects, 1);	% image skeleton branchpoints
-strokes.branches = cell(strokes.NumObjects, 1); % image skeleton branches
+regions = bwconncomp(1 - BW);
+strokes.image = blank_image;
+strokes.outline = blank_image;
+strokes.skeleton = blank_image;
+strokes.branchpoints = blank_image;
+strokes.endpoints = blank_image;
+strokes.len_shortest_branch = 0;
+strokes(1:regions.NumObjects, 1) = struct(strokes);
 
-for ii = 1:strokes.NumObjects
+for ii = 1:size(strokes, 1)
     
-    strokes.image{ii} = extract_labelled_region(blank_img, strokes.PixelIdxList{ii});   % extract only the current region
-    strokes.outline{ii} = bwmorph(strokes.image{ii}, 'remove');                 % get the outline of the shape
-    strokes.skeleton{ii} = bwmorph(strokes.image{ii}, 'skel', Inf);             % skeletonise the outline
-    strokes.branchpoints{ii} = bwmorph(strokes.skeleton{ii}, 'branchpoints');   % get the branchpoints of the skeleton
-    strokes.endpoints{ii} = bwmorph(strokes.skeleton{ii}, 'endpoints');         % get the endpoints of the skeleton
+    strokes(ii).image = extract_labelled_region(blank_image, regions.PixelIdxList{ii});   % extract only the current region
+    strokes(ii).outline = bwmorph(strokes(ii).image, 'remove');                 % get the outline of the shape
+    strokes(ii).skeleton = bwmorph(strokes(ii).image, 'skel', Inf);             % skeletonise the outline
+    
+    strokes(ii) = get_shortest_branch(strokes(ii));
     
     % remove branches that are too short
-    [end_y, end_x] = find(strokes.endpoints{ii});
-    branch_idx = find(strokes.branchpoints{ii});
-    Dmask = false(size(strokes.skeleton{ii}));
-    for jj = 1:numel(end_x)
-        D = bwdistgeodesic(strokes.skeleton{ii}, end_x(jj), end_y(jj));
-        distanceToBranchPt = min(D(branch_idx));
-        Dmask(D < distanceToBranchPt) =true;
-    end
-    skelD = strokes.skeleton{ii} - Dmask;
-    imagesc(skelD);
-    pause;
-%     strokes.branchpoints{ii} = bwmorph(strokes.branchpoints{ii}, 'thicken', 1) .* strokes.skeleton{ii};     % dilate the branchpoints
-% 
-%     
-%     strokes.branches{ii} = bwconncomp(strokes.skeleton{ii} - strokes.branchpoints{ii}); % subtract dilated branchpoints from original skeleton to split the skeleton into branches
-%        
-%     branch_areas = zeros(strokes.branches{ii}.NumObjects, 1);
-%     for jj = 1:strokes.branches{ii}.NumObjects
-%         current_branch = extract_labelled_region(blank_img, jj);
-% %         branch_areas(jj) = bwarea(current_branch);
+%     while d_shortest < branch_threshold
 %         
 %     end
+    
+%     for jj = 1:numel(end_x)
+%         D = bwdistgeodesic(strokes.skeleton{ii}, end_x(jj), end_y(jj));
+%         distanceToBranchPt = min(D(branch_idx));
+%         Dmask(D < distanceToBranchPt) =true;
+%     end
+%     skelD = strokes.skeleton{ii} - Dmask;
+%     imagesc(skelD);
+%     pause;
+
 end
 
 %% plots
@@ -85,7 +78,7 @@ if plotting
     
     subplot(1, 2, 2);
     for ii = 1:strokes.NumObjects
-        imagesc(strokes.branches{ii});
+        imagesc(strokes.skeleton{ii});
         axis equal;
         pause;
     end
