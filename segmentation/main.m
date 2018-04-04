@@ -10,16 +10,16 @@ addpath('./images/', './helper_functions/');
 constants;
 
 plotting = true;
-saving = true;
+saving = false;
 
 %% original image
 
 % file_in = 'flower.jpg';
 % file_in = 'fire.jpg';
 % file_in = 'bird.png';
-file_in = 'koi.jpg';
-% file_in = 'sumi-e-bonsai-one-lori-grimmett.jpg';
-file_out = 'result7.png';
+% file_in = 'koi.jpg';
+file_in = 'sumi-e-bonsai-one-lori-grimmett.jpg';
+file_out = 'result9.png';
 img = imread(file_in);
 n_rows = size(img, 1);
 n_cols = size(img, 2);
@@ -32,11 +32,11 @@ img = rgb2gray(img);            % convert to grayscale
 BW = imbinarize(img);           % convert to black and white
 BW = bwmorph(BW, 'spur');       % remove random pixels
 BW = imfill(1- BW, 'holes');    % fill missing pixels
-BW = 1 - BW;
+imshow(BW);
 
 %% find regions within the image
 
-regions = bwconncomp(1 - BW);
+regions = bwconncomp(BW);
 strokes.image = blank_image;            
 strokes.outline = blank_image;
 strokes.skeleton = blank_image;
