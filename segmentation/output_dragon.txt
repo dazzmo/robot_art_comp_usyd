@@ -3,6 +3,6 @@ G1 F500
 G90
 M3 S5
 M3 S5
-G0 X240 Y95   (dip ink)
+G0 X240 Y45   (dip ink)
 M3 S30
 M3 S5

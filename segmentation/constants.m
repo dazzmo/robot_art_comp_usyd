@@ -1,9 +1,9 @@
 %% image processing constants
 
-branch_threshold = 3;
-area_threshold = 3;
+branch_threshold = 8;
+area_threshold = 8;
 
-SE_light = strel('disk',2);
+SE_light = strel('disk',6);
 SE_medium = strel('disk',1);
 
 %% machine constants
@@ -28,7 +28,8 @@ global pen_down
 if plotter_blue == true
     pen_up = 5;
     pen_touching = 20;
-    pen_down = 30; 
+    pen_down = 35; 
+%     pen_down = 25;
 else
     pen_up = 5;
     pen_touching = 15;
@@ -36,7 +37,7 @@ else
 end
 
 global max_pen_width
-max_pen_width = 5;          % in mm
+max_pen_width = 8;          % in mm
 
 rapid_feed_rate = 500;
 paint_feed_rate = 500;
@@ -58,15 +59,18 @@ end
 global decimal_places
 decimal_places = '%.1f';
 
-speed_multiplier = 3;      % only look at one in every 10 pixels so as to speed the gcode up
+speed_multiplier = 6;      % only look at one in every 10 pixels so as to speed the gcode up
 
-min_paint_refill = 60;
+min_paint_refill = 20;
 
 global pen_up_str;
 pen_up_str = strcat('M3 S', num2str(pen_up), '\n');
 
 global pen_down_str;
 pen_down_str = strcat('M3 S', num2str(pen_down), '\n');
+
+global pen_touching_str;
+pen_touching_str = strcat('M3 S', num2str(pen_touching), '\n');
 
 rapid_feed_rate_str = strcat('G0 F', num2str(rapid_feed_rate), '\n');
 paint_feed_rate_str = strcat('G1 F', num2str(paint_feed_rate), '\n');
@@ -81,11 +85,14 @@ end
 
 %% original input image
 
-file_in = 'flower.jpg';
+% file_in = 'flower.jpg';
 % file_in = 'fire.jpg';
-% file_in = 'koi.jpg';
+% file_in = 'woman.jpg';
 % file_in = 'cat.jpg';
 % file_in = 'sumi-e-bonsai-one-lori-grimmett.jpg';
+% file_in = 'bamboo2.jpg';
+% file_in = 'tree1.jpg';
+file_in = 'shiba.jpg';
 file_out = 'result9.png';
 
 original_img = imread(file_in);

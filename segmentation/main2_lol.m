@@ -141,12 +141,12 @@ if plotting
     
     figure;
     
-    subplot(3, 1, 1);
+    subplot(1, 3, 1);
     imshow(img);
     title('Original image');
 
     % without pruning branches
-    subplot(3, 1, 2);
+    subplot(1, 3, 2);
     imshow(skeleton_old);
     hold on;
     scatter(branchpoints_x_old, branchpoints_y_old, 'r*');
@@ -154,7 +154,7 @@ if plotting
     title('Before pruning branches');
     legend('branchpoints', 'endpoints');
     
-    subplot(3, 1, 3);
+    subplot(1, 3, 3);
     imshow(skeleton_new);
     hold on;
     scatter(branchpoints_x_new, branchpoints_y_new, 'r*');

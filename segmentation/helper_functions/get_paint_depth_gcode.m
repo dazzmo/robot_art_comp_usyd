@@ -6,7 +6,7 @@ function gcode = get_paint_depth_gcode(r)
     global max_pen_width;   % max value in mm
     global decimal_places
     
-    z = r*2*mm_per_pixel;
+    z = r*mm_per_pixel;
     if z >= max_pen_width
         pen_depth = pen_down;
     else

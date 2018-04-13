@@ -4,5 +4,5 @@ G90
 M3 S5
 M3 S5
 G0 X240 Y95   (dip ink)
-M3 S30
+M3 S35
 M3 S5
