@@ -1,48 +1,66 @@
 %% image processing constants
 
-branch_threshold = 7;
-area_threshold = 5;
+branch_threshold = 3;
+area_threshold = 3;
+
+SE_light = strel('disk',2);
+SE_medium = strel('disk',1);
 
 %% machine constants
 
-global new_min_x
-global new_max_x
-global new_min_y
-global new_max_y
-old_min_x = 30;
-old_max_x = 230;
-old_min_y = 0;
-old_max_y = 140;
+global plotter_blue
+
+if plotter_blue == true
+    old_min_x = 0;
+    old_max_x = 200;
+    old_min_y = 0;
+    old_max_y = 140;    
+else
+    old_min_x = 30;
+    old_max_x = 230;
+    old_min_y = 0;
+    old_max_y = 140;
+end
+
+global pen_up
+global pen_touching;        % pen is just touching the page
+global pen_down
+if plotter_blue == true
+    pen_up = 5;
+    pen_touching = 20;
+    pen_down = 30; 
+else
+    pen_up = 5;
+    pen_touching = 15;
+    pen_down = 35;
+end
 
 global max_pen_width
 max_pen_width = 5;          % in mm
-global pen_up;
-pen_up = 5;
-global pen_touching;        % pen is just touching the page
-pen_touching = 15;
-global pen_down;
-pen_down = 35;
 
-rapid_feed_rate = 1000;
+rapid_feed_rate = 500;
 paint_feed_rate = 500;
 
-n_ink_pots = 4;
-ink.x = 0;
-ink.y = 70;
-ink_y_offset = 0;
-
-global mm_per_pixel;
-% mm_per_pixel = 0.15;         % scale image down
-
+if plotter_blue == true
+    n_ink_pots = 4;
+    ink.x = 240;
+    ink.y = 45;
+    ink_y_offset = 25;
+else
+    n_ink_pots = 4;
+    ink.x = 0;
+    ink.y = 70;
+    ink_y_offset = 0;
+end
 
 %% gcode strings
 
 global decimal_places
 decimal_places = '%.1f';
 
-speed_multiplier = 6;      % only look at one in every 10 pixels so as to speed the gcode up
+speed_multiplier = 3;      % only look at one in every 10 pixels so as to speed the gcode up
 
-min_paint_refill = 40;
+min_paint_refill = 60;
 
 global pen_up_str;
 pen_up_str = strcat('M3 S', num2str(pen_up), '\n');
@@ -59,4 +77,29 @@ for ii = 2:n_ink_pots
     ink(ii).x = ink(1).x;
     ink(ii).y = ink(ii-1).y + ink_y_offset;
     ink(ii).gcode = get_ink_gcode(ink(ii));
+end
+
+%% original input image
+
+file_in = 'flower.jpg';
+% file_in = 'fire.jpg';
+% file_in = 'koi.jpg';
+% file_in = 'cat.jpg';
+% file_in = 'sumi-e-bonsai-one-lori-grimmett.jpg';
+file_out = 'result9.png';
+
+original_img = imread(file_in);
+if plotter_blue == true
+    original_img = flip(original_img,1);
+else
+    original_img = flip(original_img,2);
+end
+global n_rows
+global n_cols
+n_rows = size(original_img, 1);      % y-values
+n_cols = size(original_img, 2);      % x-values
+if n_rows > n_cols
+    original_img = imrotate(original_img, 90);
+    n_rows = size(original_img, 1);      % y-values
+    n_cols = size(original_img, 2);      % x-values
 end
