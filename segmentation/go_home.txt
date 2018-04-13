@@ -1,0 +1,6 @@
+G0 F1000
+G1 F500
+G90
+M3 S5
+G0 X0 Y70   (dip ink)
+M3 S35

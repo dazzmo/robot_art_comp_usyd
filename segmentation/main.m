@@ -7,10 +7,12 @@ clearvars;
 close all;
 
 addpath('./images/', './helper_functions/');
-constants;
 
 plotting = true;
 saving = false;
+
+plotter_blue = true;
+constants;
 
 %% original input image
 
@@ -23,8 +25,23 @@ file_in = 'cat.jpg';
 file_out = 'result9.png';
 
 img = imread(file_in);
-n_rows = size(img, 1);
-n_cols = size(img, 2);
+if plotter_blue == true
+    img = flip(img,1);
+else
+    img = flip(img,2);
+end
+global n_rows
+global n_cols
+n_rows = size(img, 1);      % y-values
+n_cols = size(img, 2);      % x-values
+if n_rows > n_cols
+    img = imrotate(img, 90);
+    n_rows = size(img, 1);      % y-values
+    n_cols = size(img, 2);      % x-values
+end
+
+set_new_plotter_range(old_min_x, old_max_x, old_min_y, old_max_y);
+
 blank_image = false(n_rows, n_cols);
 
 %% gcode
@@ -32,6 +49,8 @@ blank_image = false(n_rows, n_cols);
 gcode_file = 'output.txt';
 gcode = fopen(gcode_file, 'w');
 fprintf(gcode, rapid_feed_rate_str);
+fprintf(gcode, paint_feed_rate_str);
+fprintf(gcode, 'G90\n');
 fprintf(gcode, pen_up_str);
 fprintf(gcode, ink(4).gcode);
 
@@ -137,8 +156,6 @@ for ii = 1:regions.NumObjects
         end
     end
     
-%     stroke.skeleton(widest_endpoint_index) = 0;
-
     stroke_order = bwdistgeodesic(stroke.skeleton, widest_endpoint_index);
 
     % pen down for starting point of the brushstroke
@@ -149,13 +166,31 @@ for ii = 1:regions.NumObjects
         disp('inf stroke');
     end
     
-    for jj = 1:max(max(stroke_order))
+    pixels_in_stroke = max(max(stroke_order));
+    
+    % first iteration
+    [stroke_y, stroke_x] = find(stroke_order == jj);
+    fprintf(gcode, get_paint_depth_gcode(euclidean(stroke_y, stroke_x)));
+    
+    % loop through all pixel points
+    for jj = 2:(pixels_in_stroke-1)
         [stroke_y, stroke_x] = find(stroke_order == jj);
-        fprintf(gcode, get_paint_gcode(stroke_x, stroke_y, euclidean(stroke_y, stroke_x)));  % paint the next pixel
+        fprintf(gcode, get_paint_gcode(stroke_x, stroke_y));  % paint the next pixel
+        if ~mod(jj, speed_multiplier)
+            fprintf(gcode, get_paint_depth_gcode(euclidean(stroke_y, stroke_x)));
+        end
     end
-
-    fprintf(gcode, pen_up_str);
-
+    
+    % last iteration
+    [stroke_y, stroke_x] = find(stroke_order == pixels_in_stroke);
+    fprintf(gcode, get_paint_depth_gcode(euclidean(stroke_y, stroke_x)));
+    fprintf(gcode, get_paint_gcode(stroke_x, stroke_y));
+    
+    if pixels_in_stroke > min_paint_refill
+        fprintf(gcode, get_ink_gcode(ink(4)));
+    else
+        fprintf(gcode, pen_up_str);
+    end
 end
 
 %% end of gcode
@@ -169,12 +204,12 @@ if plotting
     
     figure;
     
-    subplot(1, 3, 1);
+    subplot(3, 1, 1);
     imshow(img);
     title('Original image');
 
     % without pruning branches
-    subplot(1, 3, 2);
+    subplot(3, 1, 2);
     imshow(skeleton_old);
     hold on;
     scatter(branchpoints_x_old, branchpoints_y_old, 'r*');
@@ -182,7 +217,7 @@ if plotting
     title('Before pruning branches');
     legend('branchpoints', 'endpoints');
     
-    subplot(1, 3, 3);
+    subplot(3, 1, 3);
     imshow(skeleton_new);
     hold on;
     scatter(branchpoints_x_new, branchpoints_y_new, 'r*');
