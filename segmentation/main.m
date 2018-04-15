@@ -23,46 +23,46 @@ blank_image = false(n_rows, n_cols);
 
 %% lightest
 
-gcode_file = 'output_shiba_light.txt';
+gcode_file = 'output_dog2_light.txt';
 current_ink = 3;
 start_gcode;
 
 img = rgb2gray(imgaussfilt(original_img,2));           % convert to grayscale
 mask = blank_image;
-mask(img < 180) = 1;
+mask(img < 120) = 1;
 mask = imdilate(mask, SE_light);
 img(mask) = 255;
 BW = imbinarize(img);              % convert to black and white
-imshow(BW);
+% imshow(BW);
 
 main2_lol;
 
 %% medium
 
-gcode_file = 'output_shiba_medium.txt';
+gcode_file = 'output_dog2_medium.txt';
 current_ink = 2;
 start_gcode;
 
 img = rgb2gray(original_img);           % convert to grayscale
 mask = blank_image;
-mask(img > 170) = 1;
-mask(img < 80) = 1;
+mask(img > 160) = 1;
+mask(img < 30) = 1;
 mask = imdilate(mask, SE_medium);
 img(mask) = 255;
 BW = imbinarize(img);              % convert to black and white
-imshow(BW);
+% imshow(BW);
 
 main2_lol;
 
 %% darkest
 
+gcode_file = 'output_dog2_dark.txt';
 current_ink = 1;
-gcode_file = 'output_shiba_dark.txt';
 start_gcode;
 
 img = rgb2gray(original_img);           % convert to grayscale
-img(img > 90) = 255;
-BW = imbinarize(img);              % convert to black and white
-imshow(BW);
+% img(img > 80) = 255;
+BW = imbinarize(img, 0.6);              % convert to black and white
+% imshow(BW);
 
 main2_lol;

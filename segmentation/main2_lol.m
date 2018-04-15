@@ -25,6 +25,10 @@ for ii = 1:regions.NumObjects
     
     % get region outline
     stroke.image = extract_labelled_region(blank_image, regions.PixelIdxList{ii});   % extract only the current region
+%     if sum(sum(stroke.image)) > 250
+%         disp('area too large');
+%         continue;
+%     end
     stroke.outline = bwmorph(stroke.image, 'remove');              
     
     % skeleton

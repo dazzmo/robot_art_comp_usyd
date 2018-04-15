@@ -1,10 +1,10 @@
 %% image processing constants
 
-branch_threshold = 8;
+branch_threshold = 5;
 area_threshold = 8;
 
-SE_light = strel('disk',6);
-SE_medium = strel('disk',1);
+SE_light = strel('disk',5);
+SE_medium = strel('disk',2);
 
 %% machine constants
 
@@ -28,7 +28,7 @@ global pen_down
 if plotter_blue == true
     pen_up = 5;
     pen_touching = 20;
-    pen_down = 35; 
+    pen_down = 30; 
 %     pen_down = 25;
 else
     pen_up = 5;
@@ -61,7 +61,7 @@ decimal_places = '%.1f';
 
 speed_multiplier = 6;      % only look at one in every 10 pixels so as to speed the gcode up
 
-min_paint_refill = 20;
+min_paint_refill = 30;
 
 global pen_up_str;
 pen_up_str = strcat('M3 S', num2str(pen_up), '\n');
@@ -92,7 +92,9 @@ end
 % file_in = 'sumi-e-bonsai-one-lori-grimmett.jpg';
 % file_in = 'bamboo2.jpg';
 % file_in = 'tree1.jpg';
-file_in = 'shiba.jpg';
+% file_in = 'dragon.jpg';
+% file_in = 'dragon2.jpg';
+file_in = 'dog2.jpg';
 file_out = 'result9.png';
 
 original_img = imread(file_in);
