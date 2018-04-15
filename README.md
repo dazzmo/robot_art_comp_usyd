@@ -27,7 +27,7 @@ Running main.m inside the matlab folder will produce the relevant g-code that ca
 
 # Acknowledgements
 
-Thank to everyone who contributed to this project:
+Thank you to everyone who contributed to this project:
 
 Damian Abood, Kelly Lynch, James Wong, and Xue Yin Zhang.
 
