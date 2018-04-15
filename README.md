@@ -1,8 +1,8 @@
 # robot_art_comp_usyd
 
-Code for the International Robot Art Competition__
-University of Sydney__
-Usyd Robotics Club__
+Code for the International Robot Art Competition  
+University of Sydney  
+Usyd Robotics Club  
 Team RoboLions
 
 # Submission
