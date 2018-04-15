@@ -1,6 +1,6 @@
 # robot_art_comp_usyd
 
-Hello! This is our code for the International Robot Art Competition. We use a skeletonisation approach to approximate the brushstroke paths in an image. The image is then recreated as an ink painting on an xy-plotter. The painting Our work is inspired by Chinese and Japanese traditional ink paintings.
+Hello! This is our code for the International Robot Art Competition. We use a skeletonisation approach to approximate the brushstroke paths in an image. The image is then recreated as an ink painting on an xy-plotter. Our work is inspired by Chinese and Japanese traditional ink paintings.
 
 We welcome questions and messages, find us on Facebook or drop us an email.
 
