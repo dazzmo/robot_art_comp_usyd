@@ -6,6 +6,20 @@ Team RoboLions
 USyd Robotics Club  
 University of Sydney
 
+## Vote for us!
+
+https://robotart.org/facebook-login/
+
+https://robotart.org/team/profile/robolions_1/
+
+## Watch our time-lapse videos
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=coQyFhsPqZY" target="_blank"><img src="http://img.youtube.com/vi/coQyFhsPqZY/0.jpg" alt="Chrysanthemum" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=ecjnFn3AOOg" target="_blank"><img src="http://img.youtube.com/vi/ecjnFn3AOOg/0.jpg" alt="Diving Dragon" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=Hy-y8bLX3Hc" target="_blank"><img src="http://img.youtube.com/vi/Hy-y8bLX3Hc/0.jpg" alt="Tamaskan Dog" width="240" height="180" border="10" /></a>
+
 # Submission
 
 ## Chrysanthemum
