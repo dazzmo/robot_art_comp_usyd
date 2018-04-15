@@ -4,7 +4,7 @@ Hello! This is our code for the International Robot Art Competition. We use a sk
 
 We welcome questions and messages, find us on Facebook or drop us an email.
 
-Facebook: https://www.facebook.com/usydroboticsclub/
+Facebook: https://www.facebook.com/usydroboticsclub/  
 Email: usydrobotics@gmail.com
 
 Team RoboLions  
